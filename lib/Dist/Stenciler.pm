@@ -6,22 +6,26 @@ class Dist::Stenciler using Moose {
 
     use Path::Tiny;
     use Types::Standard -types;
-    use experimental qw/postderef signatures/;
     use namespace::sweep;
     use Eponymous::Hash 'eh';
+    use MooseX::StrictConstructor;
 
-    use Dist::Stenciler::Stencil;
     use Dist::Stenciler::Line;
+    use Dist::Stenciler::Stencil;
 
     has path => (
         is => 'ro',
         isa => Str,
         required => 1,
     );
-    has output => (
+    has plugins => (
         is => 'ro',
         isa => ArrayRef,
+        traits => ['Array'],
         default => sub { [] },
+        handles => {
+            all_plugins => 'elements',
+        },
     );
     has head_lines => (
         is => 'rw',
@@ -47,10 +51,17 @@ class Dist::Stenciler using Moose {
         }
     );
 
+    around BUILDARGS($orig: $class, %args) {
+        if(exists $args{'plugin'} && !exists $args{'plugins'}) {
+            $args{'plugins'} = [delete $args{'plugin'} ];
+        }
+        return $class->$orig(%args);
+    }
+
     method BUILD(@rest) {
         $self->parse;
 
-        foreach my $plugin ($self->output->@*) {
+        foreach my $plugin ($self->all_plugins) {
             $self->load_plugin("To::$plugin")
         }
     }
@@ -118,3 +129,8 @@ class Dist::Stenciler using Moose {
 
 }
 
+=encoding utf-8
+
+=head1 NAME
+
+Dist::Stenciler - Create tests and documentation from one source

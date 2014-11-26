@@ -1,4 +1,6 @@
-package Dist::Stenciler::Line {
+use Moops;
+
+class Dist::Stenciler::Line using Moose {
 
     use Moose;
     use Types::Standard -types;
@@ -16,5 +18,3 @@ package Dist::Stenciler::Line {
     );
 
 }
-
-1;

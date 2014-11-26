@@ -132,5 +132,3 @@ class Dist::Stenciler::Stencil using Moose {
     }
 
 }
-
-1;

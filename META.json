@@ -1,5 +1,5 @@
 {
-   "abstract" : "Blah blah blah",
+   "abstract" : "Create tests and documentation from one source",
    "author" : [
       "Erik Carlsson <csson@cpan.org>"
    ],
