@@ -2,6 +2,7 @@ Some lines in the header
 
 ==test==
 Some lines before
+the input
 --input--
 new table Books
 on Books
@@ -15,3 +16,21 @@ Schema
 The expected output
 --output--
 And some lines after
+
+==test==
+Some other lines before
+--input--
+new table Authors
+on Authors
+add author_id primary_auto
+--input--
+Some different lines in between
+--test--
+Schema
+Schema::Result::Authors
+--test--
+--output--
+The expected output
+--output--
+And some lines after
+the output
