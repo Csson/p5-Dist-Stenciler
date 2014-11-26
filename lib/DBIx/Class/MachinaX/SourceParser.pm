@@ -6,6 +6,7 @@ package DBIx::Class::MachinaX::SourceParser {
     use Path::Tiny;
     use Types::Standard -types;
     use experimental qw/postderef signatures/;
+    use namespace::sweep;
 
     use DBIx::Class::MachinaX::SourceParser::Test;
     use DBIx::Class::MachinaX::SourceParser::Line;
@@ -17,53 +18,52 @@ package DBIx::Class::MachinaX::SourceParser {
     );
     has test_index => (
         is => 'rw',
-        isa => 'HashRef',
+        isa => HashRef,
         default => sub { { } },
     );
     has output => (
         is => 'ro',
-        isa => 'ArrayRef',
+        isa => ArrayRef,
         default => sub { [] },
     );
-    foreach my $attr (qw/head_lines  tests/) {
-        has $attr => (
-            is => 'rw',
-            isa => 'ArrayRef',
-            default => { [] },
-            traits => ['Array'],
-            handles => {
-                "add_$attr" => 'push',
-                "all_$attr" => 'elements',
-            },
-
-        );
-    }
     has head_lines => (
         is => 'rw',
-        isa => 'ArrayRef',
-        default => { [] },
+        isa => ArrayRef[Str],
+        default => sub { [] },
         traits => ['Array'],
         handles => {
-            add => 'push',
-            all => 'elements',
+            add_head_line => 'push',
+            all_head_lines => 'elements',
         },
+
+    );
+    has tests => (
+        is => 'rw',
+        isa => ArrayRef[InstanceOf['DBIx::Class::MachinaX::SourceParser::Test']],
+        default => sub { [] },
+        traits => ['Array'],
+        handles => {
+            add_test => 'push',
+            all_tests => 'elements',
+            test_count => 'count',
+        }
     );
 
     sub BUILD($self) {
-        $self->_parse;
+        $self->parse;
 
         foreach my $plugin ($self->output->@*) {
             $self->load_plugin("To::$plugin")
         }
     }
 
-    sub _parse($self) {
-        my $basename = $self->_get_basename;
+    sub parse($self) {
+        my $basename = $self->get_basename;
 
         my @lines = split /\n/ => Path::Tiny::path($self->path)->slurp;
 
-        # matches ==test== ==no test== ==test loop(a thing or two)== ==test example ==test 1== ==test example 2==
-        my $start_sep = qr/==(?:(NO) )?TEST( EXAMPLE)?(?: (?:\d+))?==/i;
+        # matches ==test== ==no test== ==test example==
+        my $start_sep = qr/==(?:(NO) )?TEST( EXAMPLE)?==/i;
         my $input_sep  = '--input--';
         my $totest_sep = '--test--';
         my $output_sep = '--output--';
@@ -80,22 +80,22 @@ package DBIx::Class::MachinaX::SourceParser {
         foreach my $text (@lines) {
             my $line = DBIx::Class::MachinaX::SourceParser::Line->new(eh $text, ++$row);
 
-              $test->env eq 'head' && $line =~ $start_sep           ? $test->handle_test_start($test, $line, defined $1)
-            : $test->env eq 'head'                                  ? $self->head_lines->add($text)
+              $test->env eq 'head' && $line =~ $start_sep           ? $test->handle_test_start($test, $line, $1 // 0, $2 // 0)
+            : $test->env eq 'head'                                  ? $self->add_head_line($text)
             : $test->env eq 'before_input' && $text eq $input_sep   ? $test->end_before_input
-            : $test->env eq 'before_input'                          ? $test->lines_before_input->add($text)
+            : $test->env eq 'before_input'                          ? $test->add_lines_before_input($text)
             : $test->env eq 'input' && $text eq $input_sep          ? $test->end_input
-            : $test->env eq 'input'                                 ? $test->lines_input->add($text)
+            : $test->env eq 'input'                                 ? $test->add_lines_input($text)
             : $test->env eq 'after_input' && $text eq $totest_sep   ? $test->end_after_input
-            : $test->env eq 'after_input'                           ? $test->lines_after_input->add($text)
+            : $test->env eq 'after_input'                           ? $test->add_lines_after_input($text)
             : $test->env eq 'totest' && $text eq $totest_sep        ? $test->end_totest
-            : $test->env eq 'totest'                                ? $test->lines_totest->add($text)
+            : $test->env eq 'totest'                                ? $test->add_lines_totest($text)
             : $test->env eq 'before_output' && $text eq $output_sep ? $test->end_before_output
-            : $test->env eq 'before_output'                         ? $test->lines_before_output->add($text)
+            : $test->env eq 'before_output'                         ? $test->add_lines_before_output($text)
             : $test->env eq 'output' && $text eq $output_sep        ? $test->end_output
-            : $test->env eq 'output'                                ? $test->lines_output->add($text)
+            : $test->env eq 'output'                                ? $test->add_lines_output($text)
             : $test->env eq 'after_output' && $line =~ $start_sep   ? $test->complete
-            : $test->env eq 'after_output'                          ? $test->lines_after_output
+            : $test->env eq 'after_output'                          ? $test->add_lines_after_output($text)
             :                                                         ()
             ;
 
@@ -103,17 +103,29 @@ package DBIx::Class::MachinaX::SourceParser {
 
     }
 
-    sub _get_filename($self) {
+    sub handle_test_start($self, $test, $line, $skip = 0, $is_example = 0) {
+        $test = DBIx::Class::MachinaX::SourceParser::Test->new(number => $self->tests->count + 1,
+                                                               is_example => $is_example,
+                                                               skip => $skip,
+                                                               start_line => $line->row,
+                                                               name => sprintf '%s_%s' => $self->basename, $self->tests->count + 1,
+                                                            );
+    }
+
+    sub get_filename($self) {
         return Path::Tiny::path($self->path)->basename;
     }
-    sub _get_basename($self) {
-        my $filename = $self->_get_filename;
+    sub get_basename($self) {
+        my $filename = $self->get_filename;
         (my $basename = $filename) =~ s{^([^\.]+)\..*}{$1}; # remove suffix
         $basename =~ s{-}{_};
         return $basename;
     }
 
 }
+
+1;
+
 __END__
 
 =encoding utf-8

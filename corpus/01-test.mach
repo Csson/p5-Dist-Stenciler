@@ -1,0 +1,17 @@
+Some lines in the header
+
+==test==
+Some lines before
+--input--
+new table Books
+on Books
+add book_id primary_auto
+--input--
+Some lines in between
+--test--
+Schema
+--test--
+--output--
+The expected output
+--output--
+And some lines after
