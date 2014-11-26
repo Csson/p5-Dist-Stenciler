@@ -90,12 +90,8 @@ package DBIx::Class::MachinaX::SourceParser {
                   : $test->env eq 'before_input'                          ? $test->add_lines_before_input($text)
                   : $test->env eq 'input' && $text eq $input_sep          ? $test->set_env('after_input')
                   : $test->env eq 'input'                                 ? $test->add_lines_input($text)
-                  : $test->env eq 'after_input' && $text eq $totest_sep   ? $test->set_env('totest')
+                  : $test->env eq 'after_input' && $text eq $totest_sep   ? $test->set_env('output')
                   : $test->env eq 'after_input'                           ? $test->add_lines_after_input($text)
-                  : $test->env eq 'totest' && $text eq $totest_sep        ? $test->set_env('before_output')
-                  : $test->env eq 'totest'                                ? $test->add_lines_totest($text)
-                  : $test->env eq 'before_output' && $text eq $output_sep ? $test->set_env('output')
-                  : $test->env eq 'before_output'                         ? $test->add_lines_before_output($text)
                   : $test->env eq 'output' && $text eq $output_sep        ? $test->set_env('after_output')
                   : $test->env eq 'output'                                ? $test->add_lines_output($text)
                   : $test->env eq 'after_output' && $text =~ $start_sep   ? do {

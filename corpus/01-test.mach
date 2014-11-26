@@ -9,9 +9,6 @@ on Books
 add book_id primary_auto
 --input--
 Some lines in between
---test--
-Schema
---test--
 --output--
 The expected output
 --output--
@@ -25,10 +22,6 @@ on Authors
 add author_id primary_auto
 --input--
 Some different lines in between
---test--
-Schema
-Schema::Result::Authors
---test--
 --output--
 The expected output
 --output--

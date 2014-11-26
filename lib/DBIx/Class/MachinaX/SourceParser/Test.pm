@@ -36,8 +36,6 @@ class DBIx::Class::MachinaX::SourceParser::Test using Moose {
             lines_before_input
             lines_input
             lines_after_input
-            lines_totest
-            lines_before_output
             lines_output
             lines_after_output
         /) {
@@ -62,8 +60,6 @@ class DBIx::Class::MachinaX::SourceParser::Test using Moose {
                         before_input
                         input
                         after_input
-                        totest
-                        before_output
                         output
                         after_output
                    /]),
@@ -90,12 +86,6 @@ class DBIx::Class::MachinaX::SourceParser::Test using Moose {
     }
     around add_lines_after_input($orig: $self, @args) {
         return $self->_cleanup_lines_to_add($orig, $self->has_lines_after_input, @args);
-    }
-    around add_lines_totest($orig: $self, @args) {
-        return $self->_cleanup_lines_to_add($orig, $self->has_lines_totest, @args);
-    }
-    around add_lines_before_output($orig: $self, @args) {
-        return $self->_cleanup_lines_to_add($orig, $self->has_lines_before_output, @args);
     }
     around add_lines_output($orig: $self, @args) {
         return $self->_cleanup_lines_to_add($orig, $self->has_lines_output, @args);
@@ -125,12 +115,6 @@ class DBIx::Class::MachinaX::SourceParser::Test using Moose {
         return $self->_all_lines($orig, $joiner);
     }
     around all_lines_after_input($orig: $self, $joiner = undef) {
-        return $self->_all_lines($orig, $joiner);
-    }
-    around all_lines_totest($orig: $self, $joiner = undef) {
-        return $self->_all_lines($orig, $joiner);
-    }
-    around all_lines_before_output($orig: $self, $joiner = undef) {
         return $self->_all_lines($orig, $joiner);
     }
     around all_lines_output($orig: $self, $joiner = undef) {
