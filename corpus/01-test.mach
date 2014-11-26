@@ -15,15 +15,20 @@ The expected output
 And some lines after
 
 ==test==
-Some other lines before
+Some other lines
+before another test
 --input--
 new table Authors
 on Authors
 add author_id primary_auto
 --input--
-Some different lines in between
+Some different lines
+in between
 --output--
+
 The expected output
+goes here
+
 --output--
 And some lines after
 the output
