@@ -50,13 +50,13 @@
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/Csson/p5-DBIx-Class-MachinaX-SourceParser/issues"
+         "web" : "https://github.com/Csson/p5-Dist-Stenciler/issues"
       },
-      "homepage" : "https://github.com/Csson/p5-DBIx-Class-MachinaX-SourceParser",
+      "homepage" : "https://github.com/Csson/p5-Dist-Stenciler",
       "repository" : {
          "type" : "git",
-         "url" : "https://github.com/Csson/p5-DBIx-Class-MachinaX-SourceParser.git",
-         "web" : "https://github.com/Csson/p5-DBIx-Class-MachinaX-SourceParser"
+         "url" : "https://github.com/Csson/p5-Dist-Stenciler.git",
+         "web" : "https://github.com/Csson/p5-Dist-Stenciler"
       }
    },
    "version" : "0.0001",
