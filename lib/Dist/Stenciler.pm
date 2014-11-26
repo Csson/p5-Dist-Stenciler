@@ -1,6 +1,7 @@
-package Dist::Stenciler {
+use Moops;
 
-    use Moose;
+class Dist::Stenciler using Moose {
+
     with 'MooseX::Object::Pluggable';
 
     use Path::Tiny;
@@ -46,7 +47,7 @@ package Dist::Stenciler {
         }
     );
 
-    sub BUILD($self, @rest) {
+    method BUILD(@rest) {
         $self->parse;
 
         foreach my $plugin ($self->output->@*) {
@@ -54,7 +55,7 @@ package Dist::Stenciler {
         }
     }
 
-    sub parse($self) {
+    method parse {
         my $basename = $self->get_basename;
 
         my @lines = split /\n/ => Path::Tiny::path($self->path)->slurp;
@@ -84,9 +85,9 @@ package Dist::Stenciler {
                      : $stencil->env eq 'output' && $text eq $output_sep        ? $stencil->set_env('after_output')
                      : $stencil->env eq 'output'                                ? $stencil->add_lines_output($text)
                      : $stencil->env eq 'after_output' && $text =~ $start_sep   ? do {
-                                                                                   $self->complete_stencil($stencil);
-                                                                                   $stencil->handle_stencil_start($line, $self->stencil_count, $self->get_basename, defined $1, defined $2);
-                                                                               }
+                                                                                      $stencil = $self->complete_stencil($stencil);
+                                                                                      $stencil->handle_stencil_start($line, $self->stencil_count, $self->get_basename, defined $1, defined $2);
+                                                                                  }
                      : $stencil->env eq 'after_output'                          ? $stencil->add_lines_after_output($text)
                      :                                                         ()
                      ;
@@ -96,7 +97,7 @@ package Dist::Stenciler {
 
     }
 
-    sub complete_stencil($self, $stencil) {
+    method complete_stencil($stencil) {
         my $new_stencil = Dist::Stenciler::Stencil->new(env => 'before_input');
         return $new_stencil if $stencil->skip;
         return $new_stencil if !$stencil->has_lines_input;
@@ -105,10 +106,10 @@ package Dist::Stenciler {
         return $new_stencil;
     }
 
-    sub get_filename($self) {
+    method get_filename {
         return Path::Tiny::path($self->path)->basename;
     }
-    sub get_basename($self) {
+    method get_basename {
         my $filename = $self->get_filename;
         (my $basename = $filename) =~ s{^([^\.]+)\..*}{$1}; # remove suffix
         $basename =~ s{-}{_};
@@ -117,37 +118,3 @@ package Dist::Stenciler {
 
 }
 
-1;
-
-__END__
-
-=encoding utf-8
-
-=head1 NAME
-
-DBIx::Class::MachinaX::SourceParser - Blah blah blah
-
-=head1 SYNOPSIS
-
-  use DBIx::Class::MachinaX::SourceParser;
-
-=head1 DESCRIPTION
-
-DBIx::Class::MachinaX::SourceParser is
-
-=head1 AUTHOR
-
-Erik Carlsson E<lt>info@code301.comE<gt>
-
-=head1 COPYRIGHT
-
-Copyright 2014- Erik Carlsson
-
-=head1 LICENSE
-
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=head1 SEE ALSO
-
-=cut

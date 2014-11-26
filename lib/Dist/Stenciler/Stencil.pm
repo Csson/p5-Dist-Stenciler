@@ -95,12 +95,10 @@ class Dist::Stenciler::Stencil using Moose {
     }
     method _cleanup_lines_to_add($orig, $already_have, @args) {
         if(!$already_have) {
-            my @ok_args = ();
             ARG:
             foreach my $arg (shift @args) {
-                push @ok_args => $arg && last if $arg !~ m{^\s*$};
+                unshift @args => $arg && last if $arg !~ m{^\s*$};
             }
-            @args = @ok_args;
         }
 
         $self->$orig(@args) if scalar @args;

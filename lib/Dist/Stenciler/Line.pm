@@ -1,4 +1,4 @@
-package DBIx::Class::MachinaX::SourceParser::Line {
+package Dist::Stenciler::Line {
 
     use Moose;
     use Types::Standard -types;

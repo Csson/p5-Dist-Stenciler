@@ -7,7 +7,7 @@ use Dist::Stenciler;
 
 my $parser = Dist::Stenciler->new(path => 'corpus/01-test.mach');
 
-is($parser->test_count, 2, "Correct number of tests");
+is($parser->stencil_count, 2, "Correct number of tests");
 is(join ("\n" => $parser->all_head_lines), all_head_lines(), 'Head lines');
 
 my $test1 = $parser->get_stencil(0);
@@ -73,7 +73,8 @@ in between};
 }
 
 sub t2_output {
-q{The expected output
+q{
+The expected output
 goes here
 };
 }
