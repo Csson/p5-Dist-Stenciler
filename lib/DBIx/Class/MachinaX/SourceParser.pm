@@ -49,7 +49,7 @@ package DBIx::Class::MachinaX::SourceParser {
         }
     );
 
-    sub BUILD($self) {
+    sub BUILD($self, @rest) {
         $self->parse;
 
         foreach my $plugin ($self->output->@*) {
